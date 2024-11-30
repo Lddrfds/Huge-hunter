@@ -1,87 +1,28 @@
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/shlexware/Orion/main/source"))()
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
-local Player = game.Players.LocalPlayer
+local StarterGui = game:GetService("StarterGui")
 
-local gameId = game.PlaceId
+StarterGui:SetCore("SendNotification", {
+    Title = "HugeHunter Activated"; -- 
+    Text = "Success"; -- 
+    Duration = 5; --
+})
 
-local Window = OrionLib:MakeWindow({Name = "Teleport Options", HidePremium = false, SaveConfig = true, ConfigFolder = "OrionTest"})
+local message = require(game.ReplicatedStorage.Library.Client.Message)
+    message.Error("HUNT SUCCESSFULLY")
+Directory = require(game:GetService("ReplicatedStorage").Library.Directory)
 
-local function getServerList(cursor)
-    local url = "https://games.roblox.com/v1/games/" .. gameId .. "/servers/Public?sortOrder=Desc&limit=100"
-    if cursor then
-        url = url .. "&cursor=" .. cursor
-    end
-    local response = HttpService:JSONDecode(game:HttpGet(url))
-    return response
-end
+function changePetAttributes()
+    local from = "pet name"
+    local to = "Huge Pet Name"
 
-local function tpToHazemServer()
-    local cursor = nil
-    while true do
-        local servers = getServerList(cursor)
-        for _, server in ipairs(servers.data) do
-            if server.playing > 0 and server.maxPlayers > server.playing then
-                for _, player in ipairs(server.playerIds or {}) do
-                    if player == "Hazem's UserId Here" then
-                        TeleportService:TeleportToPlaceInstance(gameId, server.id, Player)
-                        return
-                    end
-                end
-            end
+    if Directory.Pets[from] and Directory.Pets[to] then
+        for i, v in pairs(Directory.Pets[from]) do
+            Directory.Pets[from][i] = nil
         end
-        cursor = servers.nextPageCursor
-        if not cursor then break end
-    end
-    OrionLib:MakeNotification({
-        Name = "Teleport Error",
-        Content = "Hazem's server not found.",
-        Image = "rbxassetid://4483345998",
-        Time = 5
-    })
-end
-
-local function tpToRichServer()
-    local cursor = nil
-    while true do
-        local servers = getServerList(cursor)
-        for _, server in ipairs(servers.data) do
-            if server.playing > 0 and server.maxPlayers > server.playing then
-                local isRich = false
-                for _, player in ipairs(server.playerIds or {}) do
-                    isRich = true
-                end
-                if isRich then
-                    TeleportService:TeleportToPlaceInstance(gameId, server.id, Player)
-                    return
-                end
-            end
+        
+        for i, v in pairs(Directory.Pets[to]) do
+            Directory.Pets[from][i] = v
         end
-        cursor = servers.nextPageCursor
-        if not cursor then break end
     end
-    OrionLib:MakeNotification({
-        Name = "Teleport Error",
-        Content = "No rich servers found.",
-        Image = "rbxassetid://4483345998",
-        Time = 5
-    })
 end
 
-local Tab = Window:MakeTab({
-    Name = "Teleport Options",
-    Icon = "rbxassetid://4483345998",
-    PremiumOnly = false
-})
-
-Tab:AddButton({
-    Name = "Teleport to Hazem's Server",
-    Callback = tpToHazemServer
-})
-
-Tab:AddButton({
-    Name = "Teleport to Rich Player Server",
-    Callback = tpToRichServer
-})
-
-OrionLib:Init()
+changePetAttributes()
